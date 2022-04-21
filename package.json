@@ -17,6 +17,7 @@
     "hammerjs": "^2.0.8",
     "image-js": "^0.34.0",
     "jimp": "^0.16.1",
+    "lodash": "^4.17.21",
     "next": "latest",
     "onnxruntime-web": "^1.11.0",
     "react": "^17.0.2",

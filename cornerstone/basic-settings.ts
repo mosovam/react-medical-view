@@ -5,7 +5,7 @@ import cornerstoneMath from "cornerstone-math";
 import cornerstoneTools from "cornerstone-tools";
 import Hammer from "hammerjs";
 
-export default function initCornerstone() {
+export function initCornerstone() {
     // Cornertone Tools
     cornerstoneTools.external.cornerstone = cornerstone;
     cornerstoneTools.external.Hammer = Hammer;
@@ -55,4 +55,6 @@ export default function initCornerstone() {
     // Debug
     // window.cornerstone = cornerstone;
     // window.cornerstoneTools = cornerstoneTools;
+
+    return cornerstone;
 }

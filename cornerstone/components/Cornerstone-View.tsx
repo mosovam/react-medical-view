@@ -1,17 +1,20 @@
 import React from 'react';
 import CornerstoneViewport from 'react-cornerstone-viewport'
 import {cornerstoneCustomTools, dicomImagesFromWeb} from "../cornerstone.config";
-import initCornerstone from "../basic-settings";
 
-// init cornerstone tools in app
-initCornerstone()
+interface CornerstoneViewProps {
+    imagesIds: string[]
+}
 
+const CornerstoneView = ({imagesIds}: CornerstoneViewProps) => {
+    if (!imagesIds || imagesIds.length === 0) {
+        imagesIds = dicomImagesFromWeb;
+    }
 
-const CornerstoneView = () => {
     return (
         <CornerstoneViewport
             tools={cornerstoneCustomTools}
-            imageIds={dicomImagesFromWeb}
+            imageIds={imagesIds}
             style={{minWidth: '100%', height: '512px', flex: '1'}}
         />
     )
