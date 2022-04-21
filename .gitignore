@@ -32,3 +32,8 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+/node_modules/
+/package-lock.json
+/neural-network/models/
+/*.d.ts
