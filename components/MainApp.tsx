@@ -4,13 +4,15 @@ import {arrayBufferToImage, createImage} from "../cornerstone/jpeg-loader";
 import {cloneDeep} from 'lodash';
 import {initCornerstone} from "../cornerstone/basic-settings";
 import CornerstoneViewport from "../cornerstone/components/Cornerstone-View";
+import {getPredictions} from "../neural-network/predictions";
 
 const MainApp = () => {
     const [imagesIds, setImagesIds] = useState<string[]>([]);
+    const [jpegFiles, setJpegFiles] = useState<{ [key: string]: File }>({});
 
     const jpegFIlePrefix = 'jpegfile';
     const dicomFilePrefix = 'dicomfile';
-    let jpegFiles: { [key: string]: File } = {};
+    // let jpegFiles: { [key: string]: File } = {};
 
     // init cornerstone tools in app
     const cornerstone = initCornerstone();
@@ -71,10 +73,20 @@ const MainApp = () => {
         return imageIds;
     }
 
+    const getTumorMask = async () => {
+        console.log('jpegFiles', jpegFiles);
+        // const tumorMaskImg = await getPredictions(jpegFiles[imagesIds[0]]);
+        const tumorMaskImg = await getPredictions('https://drive.google.com/uc?export=download&id=1dcBM4vewLXDqpigOJHOHEVBysPwbJ1fl');
+        console.log('tumorMaskImg', tumorMaskImg);
+    }
+
     return (
         <div>
             <h2>Cornerstone React Component Example</h2>
             <input type={"file"} name={"file"} style={{padding: 5, margin: 10}} onChange={handleChange}/>
+            <button type={"button"} name={"getTumorMask"} style={{padding: 5, margin: 10}} onClick={getTumorMask}>Get
+                tumor mask
+            </button>
             <CornerstoneViewport imagesIds={imagesIds}/>
         </div>
     )

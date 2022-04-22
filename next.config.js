@@ -23,8 +23,12 @@ module.exports = {
                         to: 'static/chunks/pages',
                     },
                     {
+                        from: './node_modules/onnxruntime-web/dist/*.wasm',
+                        to: 'static/chunks/pages'
+                    },
+                    {
                         from: './neural-network/models',
-                        to: 'static/chunks/pages',
+                        to: 'static/chunks/pages'
                     }
                 ],
             }),
