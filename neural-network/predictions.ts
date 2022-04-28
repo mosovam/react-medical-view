@@ -1,18 +1,19 @@
 import {createAndRunSession} from "./model-runner";
 import {
-    convertTensorToImageTF,
-    getImageTensorFromPath
+    convertImageIntoTensor
 } from "./prepare-image";
+import {Tensor} from "onnxruntime-web";
 
-export async function getPredictions(path): Promise<any> {
+/**
+ * Get predictions from neural network, prepare image and run the session
+ * @param path - web path to the image
+ */
+export const getPredictions = async (path: string): Promise<Tensor> => {
     if (path) {
         // 1. Convert image to tensor
-        const imageTensor = await getImageTensorFromPath(path);
-        // 2. Run model
-        let result = await createAndRunSession(imageTensor);
-        // 3. Return result
-        // result = await convertTensorToImage(result);
-        result = convertTensorToImageTF(result);
+        const imageTensor: Tensor = await convertImageIntoTensor(path);
+        // 2. Run model and return results
+        let result: Tensor = await createAndRunSession(imageTensor);
         return result;
     }
 

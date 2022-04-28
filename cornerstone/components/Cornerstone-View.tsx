@@ -7,6 +7,8 @@ interface CornerstoneViewProps {
 }
 
 const CornerstoneView = ({imagesIds}: CornerstoneViewProps) => {
+
+    // load dicom images from web if there is no image selected by user
     if (!imagesIds || imagesIds.length === 0) {
         imagesIds = dicomImagesFromWeb;
     }

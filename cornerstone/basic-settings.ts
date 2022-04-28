@@ -5,6 +5,11 @@ import cornerstoneMath from "cornerstone-math";
 import cornerstoneTools from "cornerstone-tools";
 import Hammer from "hammerjs";
 
+/**
+ * Init basic cornerstone settings
+ *
+ * - based on https://tools.cornerstonejs.org/#adding-and-using-tools
+ */
 export function initCornerstone() {
     // Cornertone Tools
     cornerstoneTools.external.cornerstone = cornerstone;
@@ -30,14 +35,11 @@ export function initCornerstone() {
 
     cornerstoneTools.store.state.touchProximity = 40;
 
-    // cornerstoneTools.addTool(MyCustomTool);
-    // cornerstoneTools.setToolActive("MyCustom", { mouseButtonMask: 1 });
-
     const OverlayTool = cornerstoneTools.OverlayTool;
     cornerstoneTools.addTool(OverlayTool);
     cornerstoneTools.setToolEnabled("Overlay", {});
 
-    // IMAGE LOADER
+    // basic IMAGE LOADER
     cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
     cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
     cornerstoneWADOImageLoader.webWorkerManager.initialize({
@@ -51,10 +53,6 @@ export function initCornerstone() {
             }
         }
     });
-
-    // Debug
-    // window.cornerstone = cornerstone;
-    // window.cornerstoneTools = cornerstoneTools;
 
     return cornerstone;
 }

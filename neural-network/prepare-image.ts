@@ -1,10 +1,13 @@
 import {Tensor} from 'onnxruntime-web';
 import * as Jimp from 'jimp';
-import {Image} from 'image-js';
-import * as buffer from "buffer";
 
-
-export async function getImageTensorFromPath(imagePath, dims: number[] = [1, 3, 512, 512]): Promise<Tensor> {
+/**
+ * Convert image into Tensor for use in neural network model
+ * @param imagePath - web path to the image
+ * @param dims - image dimensions
+ */
+export const convertImageIntoTensor = async (imagePath, dims: number[] = [1, 3, 512, 512]): Promise<Tensor> => {
+    // TODO: nezískávat z path, ale posálat přímo daný obrázek
     let image = await loadImageFromPath(imagePath, dims[2], dims[3]);
     // convert image to tensor
     let imageTensor = imageDataToTensor(image, dims);
@@ -12,20 +15,32 @@ export async function getImageTensorFromPath(imagePath, dims: number[] = [1, 3, 
     return imageTensor;
 }
 
-async function loadImageFromPath(path/*: File*/, width: number, height: number): Promise<any> {
-    console.log('path', path);
+/**
+ * Load image from web
+ * @param path - web path to the image
+ * @param width - image width
+ * @param height - image height
+ *
+ *  * based on ONNX RunTime tutorial - https://onnxruntime.ai/docs/tutorials/web/classify-images-nextjs-github-template.html
+ */
+const loadImageFromPath = async (path, width: number, height: number): Promise<any> => {
     // Use Jimp to load the image and resize it.
     let imageData = await Jimp.default.read(path).then((imageBuffer: Jimp) => {
+        // resize to the desired width and height
         return imageBuffer.resize(width, height);
     });
-
-    // let imageData = await new Uint8Array(await path.arrayBuffer())
 
     return imageData;
 }
 
-function imageDataToTensor(image, dims: number[]): Tensor {
-    console.log('image', image);
+/**
+ * Convert image (JPEG, DICOM, etc.) to Tensor for use as neural network input
+ * @param image - image in JPEG or DICOM format
+ * @param dims - dimensions of the image
+ *
+ * based on ONNX RunTime tutorial - https://onnxruntime.ai/docs/tutorials/web/classify-images-nextjs-github-template.html
+ */
+const imageDataToTensor = (image, dims: number[]): Tensor => {
     // 1. Get buffer data from image and create R, G, and B arrays.
     let imageBufferData = image.bitmap.data;
     const [redArray, greenArray, blueArray] = new Array(new Array<number>(), new Array<number>(), new Array<number>());
@@ -53,52 +68,3 @@ function imageDataToTensor(image, dims: number[]): Tensor {
     return inputTensor;
 }
 
-export async function convertTensorToImage(tensor: Tensor): Promise<any> {
-    const imgBuffer = new Float32Array()
-    const img = await Jimp.default.read(tensor.data as any)
-        .then(image => {
-            console.log('image', image)
-            return image;
-            // Do stuff with the image.
-        })
-        .catch(err => {
-            // Handle an exception.
-            console.log('err', err);
-            return undefined;
-        });
-    // const image = new ImageData(tensor.data as any, tensor.dims[2], tensor.dims[3]);
-    // console.log('image', image);
-    return img;
-}
-
-/*export function convertTensorToImageCanvas(tensor: Tensor) {
-// create an offscreen canvas
-    let canvas = document.createElement("canvas");
-    let ctx = canvas.getContext("2d");
-
-// size the canvas to your desired image
-    canvas.width = tensor.dims[2];
-    canvas.height = tensor.dims[3];
-
-
-// put the modified pixels back on the canvas
-    ctx.putImageData({data: tensor.data as any, height: tensor.dims[2], width: tensor.dims[3]}, 0, 0);
-
-// create a new img object
-    let image = new Image();
-
-// set the img.src to the canvas data url
-    image.src = canvas.toDataURL();
-
-// append the new img object to the page
-    console.log('image convertTensorToImageCanvas', image);
-    document.body.appendChild(image);
-
-    return ctx;
-}*/
-
-export function convertTensorToImageTF(tensor: Tensor) {
-    const img = new Image({data: tensor.data as any, width: tensor.dims[2], height: tensor.dims[3], components: 2, alpha: 0})
-    console.log('img', img);
-    return img;
-}

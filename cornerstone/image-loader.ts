@@ -2,6 +2,7 @@
  * SOURCES
  * - https://github.com/webnamics/cornerstoneFileImageLoader/blob/master/src/createImage.js
  */
+
 let canvas;
 if (typeof window !== 'undefined') {
     canvas = document.createElement('canvas');
@@ -17,13 +18,14 @@ if (typeof window !== 'undefined') {
  */
 export const createImage = (image: HTMLImageElement, imageId: string, cornerstone: any) => {
     // extract the attributes we need
-    const rows = image.naturalHeight;
-    const columns = image.naturalWidth;
+    const rows = image.naturalHeight ?? image.height;
+    const columns = image.naturalWidth ?? image.width;
+
 
     /**
      * Create the image in fake canvas and get data from the element
      */
-    function getPixelData () {
+    function getPixelData() {
         const context = canvas.getContext('2d');
         canvas.height = image.naturalHeight;
         canvas.width = image.naturalWidth;
@@ -32,7 +34,6 @@ export const createImage = (image: HTMLImageElement, imageId: string, cornerston
         return imageData?.data;
     }
 
-    // Extract the various attributes we need
     return {
         imageId,
         minPixelValue: 0,
@@ -61,14 +62,13 @@ export const createImage = (image: HTMLImageElement, imageId: string, cornerston
  * Convert the file ArrayBuffer result into HTMLImageElement for further use
  * @param arrayBuffer - image object as ArrayBuffer
  */
-export const arrayBufferToImage = (arrayBuffer: ArrayBuffer): Promise<HTMLImageElement>  => {
+export const arrayBufferToImage = (arrayBuffer: ArrayBuffer): Promise<any> => {
     return new Promise((resolve, reject) => {
         const image = new Image();
         const arrayBufferView = new Uint8Array(arrayBuffer);
         const blob = new Blob([arrayBufferView]);
         const imageUrl = URL.createObjectURL(blob)
 
-        image.src = imageUrl;
         image.onload = () => {
             resolve(image);
             URL.revokeObjectURL(imageUrl);
@@ -78,5 +78,12 @@ export const arrayBufferToImage = (arrayBuffer: ArrayBuffer): Promise<HTMLImageE
             URL.revokeObjectURL(imageUrl);
             reject(error);
         };
+
+        image.src = imageUrl;
+    }).catch((e) => {
+        console.log('Error while creating image from arrayBuffer: ', e);
     });
 }
+
+
+

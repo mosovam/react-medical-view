@@ -2,7 +2,10 @@
  * All Cornerstone config parameters
  */
 
-// https://tools.cornerstonejs.org/
+/**
+ * Define the Cornerstone tools
+ *  - based on https://tools.cornerstonejs.org/
+ */
 export const cornerstoneCustomTools = [
     // Mouse
     {
@@ -28,7 +31,11 @@ export const cornerstoneCustomTools = [
     {name: 'StackScrollMultiTouch', mode: 'active'},
 ]
 
-// https://docs.cornerstonejs.org/concepts/image-loaders.html
+/**
+ * Get default cornerstone images
+ *
+ *  - source: ttps://docs.cornerstonejs.org/concepts/image-loaders.html
+ */
 export const dicomImagesFromWeb = [
     'dicomweb://s3.amazonaws.com/lury/PTCTStudy/1.3.6.1.4.1.25403.52237031786.3872.20100510032220.7.dcm',
     'dicomweb://s3.amazonaws.com/lury/PTCTStudy/1.3.6.1.4.1.25403.52237031786.3872.20100510032220.8.dcm',
