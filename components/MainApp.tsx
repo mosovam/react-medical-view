@@ -137,6 +137,7 @@ const MainApp = () => {
     const getTumorMask = async () => {
         // TODO: here pass the actual image shown in cornerstone view
         await getPredictions('https://drive.google.com/uc?export=download&id=1dcBM4vewLXDqpigOJHOHEVBysPwbJ1fl')
+        // await getPredictions('https://drive.google.com/uc?export=download&id=1fEP8VoAx3ok_L31DEVIgpW9TSHsWtXvd')
             .then((mask: Tensor) => {
                 console.log('Neural network prediction COMPLETED!');
                 clearCornerstoneCache();

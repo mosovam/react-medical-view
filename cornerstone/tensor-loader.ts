@@ -6,39 +6,45 @@ import {Tensor} from "onnxruntime-web";
  * @param tensor - image as Tensor, returned from neural network
  */
 export const tensorToImageData = (tensor: Tensor): jpeg.BufferRet => {
-    // 1, Get all needed data from tensor => dimensions, data and dataLenght
-    const dims = tensor.dims;
-    const data = tensor.data;
+    /**
+     * Tensor data are between 0-1
+     * its Float32Array
+     * dims: [1, 2, 512, 512]
+     */
 
-    // TODO - use dimensions instead of 2
-    const dataL = data.length / 2;
+    console.log('tensor', tensor);
+    // 0, create 'fake' canvas element
+    const canvas = document.querySelector('canvas');
+    const ctx = canvas.getContext("2d");
+    const imgData = ctx.createImageData(tensor.dims[2], tensor.dims[3]);
 
-    const redArray = [];
-    const greenArray = [];
-    const blueArray = [];
-    const alfaArray = [];
+
+    // Now you need to assign values to imgData array into groups of four (R-G-B-A)
+    // 1, Get all needed data from tensor
+    const half = tensor.size / 2;
+    const tensorData: Float32Array = tensor.data as Float32Array;
+
+    let j = 0;
+    let i = 0;
 
     // 2, go through all data and create R, G, B and alfa channels
-    for (let i = 0; i < dataL; i++) {
-        redArray.push(data[i]);
-        greenArray.push(data[i]);
-        blueArray.push(data[i]);
-        // mask, grayscale, no alfa data
-        alfaArray.push(0);
+    while (i < half) {
+        imgData.data[j] = tensorData[i];
+        imgData.data[j + 1] = tensorData[i];
+        imgData.data[j + 2] = tensorData[i];
+        imgData.data[j + 3] = 1;
+        j += 4;
+        i += 1;
     }
 
-    // 3, Concatenate the RGB to number array
-    const concatData = redArray.concat(greenArray).concat(blueArray).concat(alfaArray);
-
-    // 4, Crate buffer from the data and normalizeit
-    const xData = new ArrayBuffer(dims[2] * dims[3] * 3);
-    for (let i = 0; i < data.length; i++) {
+    // 4, Normalize the data
+    for (let i = 0; i < imgData.data.length; i++) {
         // convert all pixels back to 0-255 RGB scale
-        xData[i] = Math.round(concatData[i] * 255);
+        imgData.data[i] = Math.round(imgData.data[i] * 255);
     }
 
     // 5, encode the array into Img
-    const toImg = encodeTheBufferIntoImage(xData);
+    const toImg = encodeTheBufferIntoImage(imgData.data);
     return toImg;
 }
 
