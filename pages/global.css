@@ -1,0 +1,86 @@
+body {
+    margin: 0;
+    background: #060452;
+    font-family: Verdana, sans-serif;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.container {
+    display: flex;
+}
+
+.left_menu {
+    height: 100vh;
+    padding: 2vh;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.main_header {
+    color: white;
+    font-size: 3em;
+    font-weight: 700;
+    line-height: 1.1em;
+    letter-spacing: 0;
+    text-align: left;
+}
+
+hr {
+    border: 0.01em solid white;
+    width: 100%;
+    margin-top: 2em;
+}
+
+.uploadButton,
+.customButton {
+    height: 2em;
+    margin-top: 0.3em;
+    margin-bottom: 0.3em;
+    text-align: left;
+    padding-left: 2em;
+    font-size: 1em;
+    background: #119B82;
+    border: none;
+    color: white;
+    font-weight: 700;
+}
+
+.uploadButton {
+    padding-top: 0.5em;
+    background: #107D6A;
+}
+
+.customButton:active,
+.uploadButton:active {
+    color: #060452;
+}
+
+.masksText {
+    color: white;
+    font-weight: 600;
+    font-size: 1.3em;
+    line-height: 1.2em;
+    padding-top: 1em;
+    padding-bottom: 0.6em
+}
+
+.aboutButton {
+    width: 100%;
+    height: 2em;
+    margin-top: 0.3em;
+    margin-bottom: 0.3em;
+    text-align: left;
+    padding-left: 2em;
+    font-size: 1em;
+    background: #024035;
+    border: none;
+    color: white;
+    font-weight: 700;
+}
+
+
+

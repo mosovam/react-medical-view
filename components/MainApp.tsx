@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState} from 'react';
 import cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import {
     arrayBufferToImage,
@@ -6,13 +6,27 @@ import {
 } from "../cornerstone/image-loader";
 import {cloneDeep} from 'lodash';
 import {initCornerstone} from "../cornerstone/basic-settings";
-import CornerstoneViewport from "../cornerstone/components/Cornerstone-View";
+import CornerstoneViewport from "../cornerstone/components/View";
 import {getPredictions} from "../neural-network/predictions";
 import {FilePrefixEnum} from "../models/file-prefix.enum";
 import {tensorToImageData} from "../cornerstone/tensor-loader";
 import {Tensor} from "onnxruntime-web";
+import CustomButton from "./CustomButton";
+
+export enum diffButtonEnum {
+    ABOUT = 'About',
+    BACK = 'Back'
+}
 
 const MainApp = () => {
+
+    // show About page or CornerstoneView component
+    const [diffButton, setDiffButton] = useState<string>(diffButtonEnum.ABOUT);
+    const changeButtonState = () => {
+        const newDiff = diffButton === diffButtonEnum.BACK ? diffButtonEnum.ABOUT : diffButtonEnum.BACK;
+        setDiffButton(newDiff);
+    }
+
     // IDs used for cornerstone images viewer
     const [imagesIds, setImagesIds] = useState<string[]>([]);
 
@@ -107,7 +121,6 @@ const MainApp = () => {
     const cacheFilesAndGetImageIds = (files: FileList): string[] => {
         const importedIds = [];
 
-        // TODO - někde tady je problém s načítáním file, kdy to při vybrání tří snímků načte 1 a 2 snímek jako stejné snímky
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
 
@@ -131,13 +144,22 @@ const MainApp = () => {
         return importedIds;
     }
 
+    const getEyesMask = async () => {
+        return;
+    }
+
+    const getBrainstemMask = async () => {
+
+    }
+
     /**
      * Pass the image to the neural network and show the result image in cornerstone view component
      **/
     const getTumorMask = async () => {
         // TODO: here pass the actual image shown in cornerstone view
-        await getPredictions('https://drive.google.com/uc?export=download&id=1dcBM4vewLXDqpigOJHOHEVBysPwbJ1fl')
+        // await getPredictions('https://drive.google.com/uc?export=download&id=1dcBM4vewLXDqpigOJHOHEVBysPwbJ1fl')
         // await getPredictions('https://drive.google.com/uc?export=download&id=1fEP8VoAx3ok_L31DEVIgpW9TSHsWtXvd')
+        await getPredictions('https://drive.google.com/uc?export=download&id=1GlnNr-7ZXsvcTIvBa8IUy2cq94o9DUby')
             .then((mask: Tensor) => {
                 console.log('Neural network prediction COMPLETED!');
                 clearCornerstoneCache();
@@ -174,15 +196,46 @@ const MainApp = () => {
 
 
     return (
-        <div>
-            <h2>Cornerstone React Component Example</h2>
-            <input type={"file"} name={"addFile"} accept="image/jpeg, */dicom,.dcm, image/dcm, */dcm, .dicom"
-                   style={{padding: 5, margin: 10}}
-                   onChange={importJPEGorDICOMFile}/>
-            <button type={"button"} name={"getTumorMask"} style={{padding: 5, margin: 10}} onClick={getTumorMask}>Get
-                tumor mask
-            </button>
-            <CornerstoneViewport imagesIds={imagesIds}/>
+        <div className={'container'}>
+            <div className={'left_menu'}>
+
+                <h2 className={'main_header'}>
+                    Automatic <br/>
+                    Brain <br/>
+                    Structures <br/>
+                    Segmentation
+                </h2>
+
+                <hr/>
+
+                <label className="uploadButton">
+                    <input type={"file"} name={"addFile"} accept="image/jpeg, */dicom,.dcm, image/dcm, */dcm, .dicom"
+                           onChange={importJPEGorDICOMFile}/>
+                    Import image
+                </label>
+
+                <hr/>
+
+                <div className={'masksText'}>
+                    Get masks <br/>
+                    for current image:
+                </div>
+
+                <CustomButton buttonName={"Tumor"} onClickFn={getTumorMask}/>
+                <CustomButton buttonName={"Brainstem"} onClickFn={getBrainstemMask}/>
+                <CustomButton buttonName={"Eyes"} onClickFn={getEyesMask}/>
+
+                <hr/>
+
+                <button className={'aboutButton'}
+                        onClick={changeButtonState}>{diffButton}</button>
+
+            </div>
+
+            <div style={{flexGrow: 2, height: "95vh", margin: 20}}>
+                <CornerstoneViewport imagesIds={imagesIds} pageType={diffButton}/>
+            </div>
+
         </div>
     )
 }
