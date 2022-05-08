@@ -16,7 +16,6 @@ const View = ({imagesIds, pageType}: CornerstoneViewProps) => {
         imagesIds = dicomImagesFromWeb;
     }
 
-
     if (pageType === diffButtonEnum.ABOUT) {
         return (
                 <CornerstoneViewport

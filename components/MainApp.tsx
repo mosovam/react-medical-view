@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import {
     arrayBufferToImage,
-    createImage
+    createImage, getImageFromFile
 } from "../cornerstone/image-loader";
 import {cloneDeep} from 'lodash';
 import {initCornerstone} from "../cornerstone/basic-settings";
@@ -18,6 +18,17 @@ export enum diffButtonEnum {
     BACK = 'Back'
 }
 
+export enum NeuralNetworkType {
+    TUMOR = 'TUMOR',
+    BRAINSTEM = 'BRAINSTEM',
+    EYE = 'EYE'
+}
+
+let canvas;
+if (typeof window !== 'undefined') {
+    canvas = document.createElement('canvas');
+}
+
 const MainApp = () => {
 
     // show About page or CornerstoneView component
@@ -29,6 +40,7 @@ const MainApp = () => {
 
     // IDs used for cornerstone images viewer
     const [imagesIds, setImagesIds] = useState<string[]>([]);
+    const [actualImgId, setActualImgId] = useState<string>();
 
     // TODO: create some store instead of this?
     const [jpegFiles, setJpegFiles] = useState<{ [key: string]: File }>({});
@@ -43,6 +55,7 @@ const MainApp = () => {
 
         const imageIds = cloneDeep(cacheFilesAndGetImageIds(event.target.files as FileList));
         // set images and automatically trigger the image change in cornerstone view component
+        setActualImgId(imageIds);
         setImagesIds([...imagesIds, ...imageIds]);
     }
 
@@ -144,38 +157,61 @@ const MainApp = () => {
         return importedIds;
     }
 
-    const getEyesMask = async () => {
-        return;
-    }
+    /**
+     * Save returned tensor mask into the nnImages array for further use
+     * @param mask - mask in Tensor
+     */
+    const saveTensorMask = (mask: Tensor) => {
+        console.log('Neural network prediction COMPLETED!');
+        clearCornerstoneCache();
 
-    const getBrainstemMask = async () => {
+        // create NN image id
+        const maskImageId: string = `${FilePrefixEnum.NN}:${(Math.round(Math.random() * 10000000))}`;
+        // store the mask with nnImageId as object key
+        setNnImages(images => ({
+            ...images,
+            [maskImageId]: mask
+        }));
 
+        // set images and automatically trigger the image change in cornerstone view component
+        setImagesIds([...imagesIds, maskImageId]);
     }
 
     /**
-     * Pass the image to the neural network and show the result image in cornerstone view component
+     * Pass the image to the neural network and show the result eye image in cornerstone view component
+     **/
+    const getEyesMask = async () => {
+        await getPredictions('https://drive.google.com/uc?export=download&id=1GlnNr-7ZXsvcTIvBa8IUy2cq94o9DUby', NeuralNetworkType.EYE)
+            .then((mask: Tensor) => {
+                saveTensorMask(mask);
+            }).catch((e) => {
+                console.log('Error while getting prediction mask in Neural network: ', e);
+            })
+    }
+
+    /**
+     * Pass the image to the neural network and show the result brainstem image in cornerstone view component
+     **/
+    const getBrainstemMask = async () => {
+        await getPredictions('https://drive.google.com/uc?export=download&id=1GlnNr-7ZXsvcTIvBa8IUy2cq94o9DUby', NeuralNetworkType.BRAINSTEM)
+            .then((mask: Tensor) => {
+                saveTensorMask(mask);
+            }).catch((e) => {
+                console.log('Error while getting prediction mask in Neural network: ', e);
+            })
+    }
+
+    /**
+     * Pass the image to the neural network and show the result tumor image in cornerstone view component
      **/
     const getTumorMask = async () => {
         // TODO: here pass the actual image shown in cornerstone view
         // await getPredictions('https://drive.google.com/uc?export=download&id=1dcBM4vewLXDqpigOJHOHEVBysPwbJ1fl')
         // await getPredictions('https://drive.google.com/uc?export=download&id=1fEP8VoAx3ok_L31DEVIgpW9TSHsWtXvd')
-        await getPredictions('https://drive.google.com/uc?export=download&id=1GlnNr-7ZXsvcTIvBa8IUy2cq94o9DUby')
+
+        await getPredictions('https://drive.google.com/uc?export=download&id=1GlnNr-7ZXsvcTIvBa8IUy2cq94o9DUby', NeuralNetworkType.TUMOR)
             .then((mask: Tensor) => {
-                console.log('Neural network prediction COMPLETED!');
-                clearCornerstoneCache();
-
-                // create NN image id
-                const maskImageId: string = `${FilePrefixEnum.NN}:${(Math.round(Math.random() * 10000000))}`;
-                // store the mask with nnImageId as object key
-                setNnImages(images => ({
-                    ...images,
-                    [maskImageId]: mask
-                }));
-
-                // set images and automatically trigger the image change in cornerstone view component
-                setImagesIds([...imagesIds, maskImageId]);
-
-                return mask;
+                saveTensorMask(mask);
             }).catch((e) => {
                 console.log('Error while getting prediction mask in Neural network: ', e);
             })

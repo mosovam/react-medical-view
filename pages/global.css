@@ -8,6 +8,10 @@ input[type="file"] {
     display: none;
 }
 
+a {
+    color: wheat;
+}
+
 .container {
     display: flex;
 }
@@ -63,7 +67,7 @@ hr {
     color: white;
     font-weight: 600;
     font-size: 1.3em;
-    line-height: 1.2em;
+    line-height: 1.4em;
     padding-top: 1em;
     padding-bottom: 0.6em
 }
@@ -80,6 +84,12 @@ hr {
     border: none;
     color: white;
     font-weight: 700;
+}
+
+.aboutText {
+    color: white;
+    margin-top: 3em;
+    line-height: 1.7em;
 }
 
 

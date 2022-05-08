@@ -8,9 +8,10 @@ import * as Jimp from 'jimp';
  */
 export const convertImageIntoTensor = async (imagePath, dims: number[] = [1, 3, 512, 512]): Promise<Tensor> => {
     // TODO: nezískávat z path, ale posálat přímo daný obrázek
-    let image = await loadImageFromPath(imagePath, dims[2], dims[3]);
+    // let image = await loadImageFromPath(imagePath, dims[2], dims[3]);
+    let image = imagePath;
     // convert image to tensor
-    let imageTensor = imageDataToTensor(image, dims);
+    let imageTensor = imageDataToTensor(imagePath, dims);
     // return the tensor
     return imageTensor;
 }
@@ -42,7 +43,7 @@ const loadImageFromPath = async (path, width: number, height: number): Promise<a
  */
 const imageDataToTensor = (image, dims: number[]): Tensor => {
     // 1. Get buffer data from image and create R, G, and B arrays.
-    let imageBufferData = image.bitmap.data;
+    let imageBufferData = image/*.bitmap.data;*/
     const [redArray, greenArray, blueArray] = new Array(new Array<number>(), new Array<number>(), new Array<number>());
 
     // 2. Loop through the image buffer and extract the R, G, and B channels

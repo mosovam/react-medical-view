@@ -26,7 +26,7 @@ export const createImage = (image: HTMLImageElement, imageId: string, cornerston
      * Create the image in fake canvas and get data from the element
      */
     function getPixelData() {
-        const context = canvas.getContext('2d');
+        const context = canvas.getContext('2dcreateImage');
         canvas.height = image.naturalHeight;
         canvas.width = image.naturalWidth;
         context?.drawImage(image, 0, 0);
@@ -83,6 +83,33 @@ export const arrayBufferToImage = (arrayBuffer: ArrayBuffer): Promise<any> => {
     }).catch((e) => {
         console.log('Error while creating image from arrayBuffer: ', e);
     });
+}
+
+export const getImageFromFile = async (img: File):Promise<any> => {
+    return new Promise((resolve, reject) => {
+        const fileReader = new FileReader();
+
+        // load the file and create image from it
+        fileReader.onload = (e: ProgressEvent<FileReader>) => {
+            if (e?.target?.result) {
+
+                // convert buffer to image that can be used in cornerstone view component
+                const imagePromise = arrayBufferToImage(e.target.result as ArrayBuffer);
+
+                imagePromise.then((image) => {
+                    resolve(image);
+                }, reject);
+            } else {
+                throw Error();
+            }
+        };
+
+        // read the loaded file
+        fileReader.onerror = reject;
+        fileReader.readAsArrayBuffer(img);
+    }).catch((e) => {
+        console.log('Error while loading the JPEG file: ', e);
+    })
 }
 
 

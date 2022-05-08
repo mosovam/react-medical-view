@@ -13,8 +13,8 @@ Perform analysis of magnetic resonance images of the brain in browser by AI. Aut
 ### Add neural network models to the app
 
 - there is problem with adding the models to the Git (push will fail because of model large size)
-- [download](https://drive.google.com/file/d/17sgYd1M7gMgP3MdB_FU7GpL_43eFdsvd/view?usp=sharing) models
-- add them to the `neural-network/models` folder
+- [download](https://drive.google.com/drive/folders/1Bl94d1WeUIYHmP8U5MOfwPyDLoyi5HR1?usp=sharing) models
+- add them to the `neural-network/models/` folder
 - check the model name with the one used in `neural-network/model-runner.ts` file -> `createAndRunSession` function
 
 ### Install CORS plugin to your browser
