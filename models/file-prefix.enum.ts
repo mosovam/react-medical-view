@@ -1,5 +1,4 @@
 export enum FilePrefixEnum {
-    JPEG = 'jpegfile',
-    DICOM = 'dicomfile',
+    IMG = 'imgfile',
     NN = 'nnfile'
 }

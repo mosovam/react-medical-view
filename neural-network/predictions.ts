@@ -1,19 +1,20 @@
 import {createAndRunSession} from "./model-runner";
 import {
     convertImageIntoTensor
-} from "./prepare-image";
+} from "../img-services/img-to-tensor";
 import {Tensor} from "onnxruntime-web";
-import {NeuralNetworkType} from "../components/MainApp";
+import Jimp from "jimp";
+import {NnTypeEnum} from "../models/nn-type.enum";
 
 /**
  * Get predictions from neural network, prepare image and run the session
- * @param path - web path to the image
+ * @param img - image in Jimp format
  * @param nnType - type representation of neural network
  */
-export const getPredictions = async (path, nnType: NeuralNetworkType): Promise<Tensor> => {
-    if (path) {
+export const getPredictions = async (img: Jimp, nnType: NnTypeEnum): Promise<Tensor> => {
+    if (img) {
         // 1. Convert image to tensor
-        const imageTensor: Tensor = await convertImageIntoTensor(path);
+        const imageTensor: Tensor = await convertImageIntoTensor(img);
         // 2. Run model and return results
         let result: Tensor = await createAndRunSession(imageTensor, nnType);
         return result;

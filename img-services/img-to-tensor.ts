@@ -3,47 +3,23 @@ import * as Jimp from 'jimp';
 
 /**
  * Convert image into Tensor for use in neural network model
- * @param imagePath - web path to the image
+ * @param img - image in Jimp format
  * @param dims - image dimensions
  */
-export const convertImageIntoTensor = async (imagePath, dims: number[] = [1, 3, 512, 512]): Promise<Tensor> => {
-    // TODO: nezískávat z path, ale posálat přímo daný obrázek
-    // let image = await loadImageFromPath(imagePath, dims[2], dims[3]);
-    let image = imagePath;
-    // convert image to tensor
-    let imageTensor = imageDataToTensor(imagePath, dims);
-    // return the tensor
-    return imageTensor;
+export const convertImageIntoTensor = async (img: Jimp, dims: number[] = [1, 3, 512, 512]): Promise<Tensor> => {
+    return imageDataToTensor(img, dims);
 }
 
 /**
- * Load image from web
- * @param path - web path to the image
- * @param width - image width
- * @param height - image height
- *
- *  * based on ONNX RunTime tutorial - https://onnxruntime.ai/docs/tutorials/web/classify-images-nextjs-github-template.html
- */
-const loadImageFromPath = async (path, width: number, height: number): Promise<any> => {
-    // Use Jimp to load the image and resize it.
-    let imageData = await Jimp.default.read(path).then((imageBuffer: Jimp) => {
-        // resize to the desired width and height
-        return imageBuffer.resize(width, height);
-    });
-
-    return imageData;
-}
-
-/**
- * Convert image (JPEG, DICOM, etc.) to Tensor for use as neural network input
- * @param image - image in JPEG or DICOM format
+ * Convert image to Tensor for use as neural network input
+ * @param image - image in JPEG, JPG or PNG format
  * @param dims - dimensions of the image
  *
  * based on ONNX RunTime tutorial - https://onnxruntime.ai/docs/tutorials/web/classify-images-nextjs-github-template.html
  */
-const imageDataToTensor = (image, dims: number[]): Tensor => {
+const imageDataToTensor = (image: Jimp, dims: number[]): Tensor => {
     // 1. Get buffer data from image and create R, G, and B arrays.
-    let imageBufferData = image/*.bitmap.data;*/
+    let imageBufferData = image.bitmap.data;
     const [redArray, greenArray, blueArray] = new Array(new Array<number>(), new Array<number>(), new Array<number>());
 
     // 2. Loop through the image buffer and extract the R, G, and B channels
@@ -64,8 +40,8 @@ const imageDataToTensor = (image, dims: number[]): Tensor => {
     for (i = 0; i < l; i++) {
         float32Data[i] = transposedData[i] / 255.0; // convert to float
     }
+
     // 5. create the tensor object from onnxruntime-web.
     const inputTensor = new Tensor("float32", float32Data, dims);
     return inputTensor;
 }
-

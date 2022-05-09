@@ -6,7 +6,7 @@ App created with the [Next.js](https://nextjs.org/), [React](https://reactjs.org
 
 Practical part of my Bachelor thesis - Analysis of medical data using neural networks (OSU, Applied Informatics).
 
-Perform analysis of magnetic resonance images of the brain in browser by AI. Automatic segmentation of brain tumor and organs at risks (eyes, brainstem) in imported JPEG or DICOM images.
+Perform analysis of magnetic resonance images of the brain in browser by AI. Automatic segmentation of brain tumor and organs at risks (eyes, brainstem) in imported JPEG, JPG or PNG images.
 
 ## Prerequisites
 

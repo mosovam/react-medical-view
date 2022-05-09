@@ -12,7 +12,7 @@ const About = () => {
                 Practical part of my Bachelor thesis - Analysis of medical data using neural networks (<a
                 href={'https://www.osu.cz/'}>OSU</a>, <a href={'https://prf.osu.cz/kip/'}>Applied Informatics</a>).
             <br/><br/>
-                Perform analysis of magnetic resonance images of the brain in browser by AI. Automatic segmentation of brain tumor and organs at risks (eyes, brainstem) in imported JPEG or DICOM images.
+                Perform analysis of magnetic resonance images of the brain in browser by AI. Automatic segmentation of brain tumor and organs at risks (eyes, brainstem) in imported images.
             <br/><br/>
                 Hope you will enjoy, thanks and have a nice day!
             </span>
@@ -32,7 +32,7 @@ const About = () => {
             <hr/>
 
             <h3>How to use:</h3>
-            1, Import your own MRI brain image in JPEG or DICOM format by click on the 'Import image' button<br/>
+            1, Import your own MRI brain image in JPEG, JPG or PNG format by click on the 'Import image' button<br/>
             2, Click on the 'Tumor', 'Brainstem' or 'Eye' button - depends on the mask which you need<br/>
             3, Wait for the neural network showing you the resulting mask<br/>
 

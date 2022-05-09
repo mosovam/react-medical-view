@@ -92,5 +92,11 @@ hr {
     line-height: 1.7em;
 }
 
+.mainView {
+    flex-grow: 2;
+    height: 96vh;
+    margin: 1em;
+}
+
 
 

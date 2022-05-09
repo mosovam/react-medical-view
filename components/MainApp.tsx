@@ -1,100 +1,66 @@
-import React, {useState} from 'react';
-import cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
-import {
-    arrayBufferToImage,
-    createImage, getImageFromFile
-} from "../cornerstone/image-loader";
+import React, {useEffect, useState} from 'react';
 import {cloneDeep} from 'lodash';
 import {initCornerstone} from "../cornerstone/basic-settings";
-import CornerstoneViewport from "../cornerstone/components/View";
 import {getPredictions} from "../neural-network/predictions";
 import {FilePrefixEnum} from "../models/file-prefix.enum";
-import {tensorToImageData} from "../cornerstone/tensor-loader";
 import {Tensor} from "onnxruntime-web";
 import CustomButton from "./CustomButton";
-
-export enum diffButtonEnum {
-    ABOUT = 'About',
-    BACK = 'Back'
-}
-
-export enum NeuralNetworkType {
-    TUMOR = 'TUMOR',
-    BRAINSTEM = 'BRAINSTEM',
-    EYE = 'EYE'
-}
-
-let canvas;
-if (typeof window !== 'undefined') {
-    canvas = document.createElement('canvas');
-}
+import UploadFileButton from "./UploadFileButton";
+import {getImageAsJimp, loadActualShowedImage} from "../img-services/read-actual-image";
+import Jimp from "jimp";
+import {loadImageIntoCornerstone, loadNNImageIntoCornerstone} from "../img-services/img-cornerstone-loaders";
+import View from "./View";
+import {DiffButtonEnum} from "../models/diff-button.enum";
+import {NnTypeEnum} from "../models/nn-type.enum";
+import cornerstone from 'cornerstone-core';
 
 const MainApp = () => {
+    let loadImageAtStart = false;
+
+    // init cornerstone tools in app
+    initCornerstone();
+    const clearCornerstoneCache = (): void => {
+        cornerstone.imageCache.purgeCache();
+    }
 
     // show About page or CornerstoneView component
-    const [diffButton, setDiffButton] = useState<string>(diffButtonEnum.ABOUT);
+    const [diffButton, setDiffButton] = useState<string>(DiffButtonEnum.ABOUT);
     const changeButtonState = () => {
-        const newDiff = diffButton === diffButtonEnum.BACK ? diffButtonEnum.ABOUT : diffButtonEnum.BACK;
+        const newDiff = diffButton === DiffButtonEnum.BACK ? DiffButtonEnum.ABOUT : DiffButtonEnum.BACK;
         setDiffButton(newDiff);
     }
 
     // IDs used for cornerstone images viewer
     const [imagesIds, setImagesIds] = useState<string[]>([]);
     const [actualImgId, setActualImgId] = useState<string>();
-
-    // TODO: create some store instead of this?
-    const [jpegFiles, setJpegFiles] = useState<{ [key: string]: File }>({});
+    const [imgFiles, setImgFiles] = useState<{ [key: string]: File }>({});
     const [nnImages, setNnImages] = useState<{ [key: string]: any }>({});
 
     /**
-     * Import JPEG or DICOM image selected by user and show it in cornerstone view component
+     * Import JPEG, JPG or PNG image selected by user and show it in cornerstone view component
      * @param event - event carrying the image file
      */
-    const importJPEGorDICOMFile = (event: React.ChangeEvent<HTMLInputElement>): void => {
-        clearCornerstoneCache();
+    const importImageFile = (event: React.ChangeEvent<HTMLInputElement>): void => {
+        if (event) {
+            const imageIds: string[] = cloneDeep(cacheFilesAndGetImageIds(event.target.files as FileList));
+            clearCornerstoneCache();
 
-        const imageIds = cloneDeep(cacheFilesAndGetImageIds(event.target.files as FileList));
-        // set images and automatically trigger the image change in cornerstone view component
-        setActualImgId(imageIds);
-        setImagesIds([...imagesIds, ...imageIds]);
+            // set images and automatically trigger the image change in cornerstone view component
+            setActualImgId(imageIds[0]);
+            setImagesIds(imgIds => [...imgIds, ...imageIds]);
+
+            console.log('File import COMPLETED!');
+        }
     }
 
     /**
      * Load image imported by user into app into cornerstone view component
-     *  - this loader is automatically selected by cornerstone thanks to the 'imageID' prefix = 'jpegfile'
+     *  - this loader is automatically selected by cornerstone thanks to the 'imageID' prefix = 'imgfile'
      *  - return promise in object, because of cornerstone
-     * @param imageId - image id with 'jpegfile' prefix
+     * @param imageId - image id with 'imgfile' prefix (JPEG, JPG or PNG)
      */
-    const loadJPEG = (imageId: string): { promise: Promise<any> } => {
-        const promise = new Promise((resolve, reject) => {
-            const fileReader = new FileReader();
-
-            // load the file and create image from it
-            fileReader.onload = (e: ProgressEvent<FileReader>) => {
-                if (e?.target?.result) {
-
-                    // convert buffer to image that can be used in cornerstone view component
-                    const imagePromise = arrayBufferToImage(e.target.result as ArrayBuffer);
-
-                    imagePromise.then((image) => {
-                        const imageObject = createImage(image, imageId, cornerstone);
-                        resolve(imageObject);
-                    }, reject);
-                } else {
-                    throw Error();
-                }
-            };
-
-            // read the loaded file
-            fileReader.onerror = reject;
-            fileReader.readAsArrayBuffer(jpegFiles[imageId]);
-        }).catch((e) => {
-            console.log('Error while loading the JPEG file: ', e);
-        })
-
-        return {
-            promise
-        }
+    const loadImportedImage = (imageId: string): { promise: Promise<any> } => {
+        return loadImageIntoCornerstone(imgFiles[imageId], imageId, cornerstone);
     }
 
     /**
@@ -104,32 +70,12 @@ const MainApp = () => {
      * @param imageId - image id with 'nnfile' prefix
      */
     const loadNNImage = (imageId: string): { promise: Promise<any> } => {
-        const promise = new Promise((resolve, reject) => {
-
-            // convert vector returned by the neural network to image data
-            const img = tensorToImageData(nnImages[imageId]);
-            // convert buffer to image that can be used in cornerstone view component
-            const imagePromise = arrayBufferToImage(img.data);
-
-            imagePromise.then((image) => {
-                const imageObject = createImage(image, imageId, cornerstone);
-                resolve(imageObject);
-            }, reject).catch((e) => {
-                console.log('Error while creating image returned by Neural Network: ', e);
-            })
-        }).catch((e) => {
-            console.log('Error while loading image returned by Neural Network: ', e);
-        });
-
-        return {
-            promise
-        }
+        return loadNNImageIntoCornerstone(nnImages[imageId], imageId, cornerstone);
     }
 
-
     /**
-     * Cache JPEG or DICOM file imported by user and actualize 'imagesIds' array to trigger change image in cornerstone view component
-     * @param files - all imported JPEG or DICOM images
+     * Cache image file imported by user and actualize 'imagesIds' array to trigger change image in cornerstone view component
+     * @param files - all imported JPEG. JPG or PNG imagess
      */
     const cacheFilesAndGetImageIds = (files: FileList): string[] => {
         const importedIds = [];
@@ -137,21 +83,15 @@ const MainApp = () => {
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
 
-            if (file.type.includes('dicom')) {
-                // DICOM image has it's own loader in cornerstone
-                importedIds.push(cornerstoneWADOImageLoader.wadouri.fileManager.add(file))
-            } else if (file.type.includes('jpeg')) {
-                // for JPEG image, there is custom loader needed, so store only the id
-                const importedFileId: string = `${FilePrefixEnum.JPEG}:${(Math.round(Math.random() * 10000000))}`;
+            const importedFileId: string = `${FilePrefixEnum.IMG}:${(Math.round(Math.random() * 10000000))}`;
 
-                // store the file with imageId as object key
-                setJpegFiles(images => ({
-                    ...images,
-                    [importedFileId]: file
-                }));
+            // store the file with imageId as object key
+            setImgFiles(images => ({
+                ...images,
+                [importedFileId]: file
+            }));
 
-                importedIds.push(importedFileId);
-            }
+            importedIds.push(importedFileId);
         }
 
         return importedIds;
@@ -162,7 +102,6 @@ const MainApp = () => {
      * @param mask - mask in Tensor
      */
     const saveTensorMask = (mask: Tensor) => {
-        console.log('Neural network prediction COMPLETED!');
         clearCornerstoneCache();
 
         // create NN image id
@@ -178,63 +117,62 @@ const MainApp = () => {
     }
 
     /**
-     * Pass the image to the neural network and show the result eye image in cornerstone view component
+     * Pass the image to the neural network and show the result mask image in cornerstone view component
      **/
+    const getMask = async (nnType: NnTypeEnum) => {
+        await loadActualShowedImage(imgFiles[actualImgId])
+            .then((img: Jimp) => {
+                return getPredictions(img, nnType)
+            }).then((mask: Tensor) => {
+                console.log(`Neural network prediction for ${nnType} COMPLETED!`);
+                console.log('Returned Tensor', mask);
+                saveTensorMask(mask);
+            }).catch((e) => {
+                console.log(`ERROR while getting prediction mask for ${nnType} in Neural network: `, e);
+            })
+    }
+
     const getEyesMask = async () => {
-        await getPredictions('https://drive.google.com/uc?export=download&id=1GlnNr-7ZXsvcTIvBa8IUy2cq94o9DUby', NeuralNetworkType.EYE)
-            .then((mask: Tensor) => {
-                saveTensorMask(mask);
-            }).catch((e) => {
-                console.log('Error while getting prediction mask in Neural network: ', e);
-            })
+        await getMask(NnTypeEnum.EYE);
     }
 
-    /**
-     * Pass the image to the neural network and show the result brainstem image in cornerstone view component
-     **/
     const getBrainstemMask = async () => {
-        await getPredictions('https://drive.google.com/uc?export=download&id=1GlnNr-7ZXsvcTIvBa8IUy2cq94o9DUby', NeuralNetworkType.BRAINSTEM)
-            .then((mask: Tensor) => {
-                saveTensorMask(mask);
-            }).catch((e) => {
-                console.log('Error while getting prediction mask in Neural network: ', e);
-            })
+        await getMask(NnTypeEnum.BRAINSTEM);
     }
 
-    /**
-     * Pass the image to the neural network and show the result tumor image in cornerstone view component
-     **/
     const getTumorMask = async () => {
-        // TODO: here pass the actual image shown in cornerstone view
-        // await getPredictions('https://drive.google.com/uc?export=download&id=1dcBM4vewLXDqpigOJHOHEVBysPwbJ1fl')
-        // await getPredictions('https://drive.google.com/uc?export=download&id=1fEP8VoAx3ok_L31DEVIgpW9TSHsWtXvd')
-
-        await getPredictions('https://drive.google.com/uc?export=download&id=1GlnNr-7ZXsvcTIvBa8IUy2cq94o9DUby', NeuralNetworkType.TUMOR)
-            .then((mask: Tensor) => {
-                saveTensorMask(mask);
-            }).catch((e) => {
-                console.log('Error while getting prediction mask in Neural network: ', e);
-            })
-
+        await getMask(NnTypeEnum.TUMOR);
     }
 
-    // init cornerstone tools in app
-    const cornerstone = initCornerstone();
-    const clearCornerstoneCache = (): void => {
-        cornerstone.imageCache.purgeCache();
-    }
-
-    // register the images to the cornerstone
-    // DICOM images are loaded automatically, for 'JPEG' and mask from neural network there is the custom loader needed
-    cornerstone.registerImageLoader(FilePrefixEnum.DICOM, cornerstoneWADOImageLoader.loadImage);
-    cornerstone.registerImageLoader(FilePrefixEnum.JPEG, loadJPEG)
+    // register the images loaders to cornerstone
+    cornerstone.registerImageLoader(FilePrefixEnum.IMG, loadImportedImage)
     cornerstone.registerImageLoader(FilePrefixEnum.NN, loadNNImage)
 
+/*    if (loadImageAtStart) {
+        loadImageAtStart = false;
+
+        getImageAsJimp('https://drive.google.com/uc?export=download&id=1y_bASrdwaxEdQpfhcGDU_3QbkriUeMpt', 512, 512)
+            .then((img: Jimp) => {
+                // set images and automatically trigger the image change in cornerstone view component
+                const imgFileId: string = `${FilePrefixEnum.IMG}:${(Math.round(Math.random() * 10000000))}`;
+                const arrayBufferView = new Uint8Array(img.bitmap.data);
+                const blob = new Blob([arrayBufferView]);
+                const file = new File([blob], "filename")
+
+                // store the file with imageId as object key
+                setImgFiles(images => ({
+                    ...images,
+                    [imgFileId]: file
+                }));
+
+                setActualImgId(imgFileId);
+                setImagesIds(imgIds => [...imgIds, imgFileId]);
+            })
+    }*/
 
     return (
         <div className={'container'}>
             <div className={'left_menu'}>
-
                 <h2 className={'main_header'}>
                     Automatic <br/>
                     Brain <br/>
@@ -244,12 +182,7 @@ const MainApp = () => {
 
                 <hr/>
 
-                <label className="uploadButton">
-                    <input type={"file"} name={"addFile"} accept="image/jpeg, */dicom,.dcm, image/dcm, */dcm, .dicom"
-                           onChange={importJPEGorDICOMFile}/>
-                    Import image
-                </label>
-
+                <UploadFileButton importImageFile={importImageFile}/>
                 <hr/>
 
                 <div className={'masksText'}>
@@ -260,7 +193,6 @@ const MainApp = () => {
                 <CustomButton buttonName={"Tumor"} onClickFn={getTumorMask}/>
                 <CustomButton buttonName={"Brainstem"} onClickFn={getBrainstemMask}/>
                 <CustomButton buttonName={"Eyes"} onClickFn={getEyesMask}/>
-
                 <hr/>
 
                 <button className={'aboutButton'}
@@ -268,8 +200,8 @@ const MainApp = () => {
 
             </div>
 
-            <div style={{flexGrow: 2, height: "95vh", margin: 20}}>
-                <CornerstoneViewport imagesIds={imagesIds} pageType={diffButton}/>
+            <div className={'mainView'}>
+                <View imagesIds={imagesIds} pageType={diffButton}/>
             </div>
 
         </div>

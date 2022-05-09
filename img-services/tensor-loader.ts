@@ -13,7 +13,7 @@ export const tensorToImageData = (tensor: Tensor): jpeg.BufferRet => {
      */
 
     console.log('tensor', tensor);
-    // 0, create 'fake' canvas element
+        // 0, create 'fake' canvas element
     const canvas = document.querySelector('canvas');
     const ctx = canvas.getContext("2d");
     const imgData = ctx.createImageData(tensor.dims[2], tensor.dims[3]);
@@ -32,10 +32,12 @@ export const tensorToImageData = (tensor: Tensor): jpeg.BufferRet => {
         imgData.data[j] = tensorData[i];
         imgData.data[j + 1] = tensorData[i];
         imgData.data[j + 2] = tensorData[i];
-        imgData.data[j + 3] = 1;
+        imgData.data[j + 3] = tensorData[i];
         j += 4;
         i += 1;
     }
+
+    console.log('imgData', imgData);
 
     // 4, Normalize the data
     for (let i = 0; i < imgData.data.length; i++) {
@@ -53,7 +55,6 @@ export const tensorToImageData = (tensor: Tensor): jpeg.BufferRet => {
  * @param arrayBuffer - image data
  */
 const encodeTheBufferIntoImage = (arrayBuffer: ArrayBuffer): jpeg.BufferRet => {
-    // TODO: nooo 512, use dimensions!
     const rawImageData = {
         data: arrayBuffer,
         width: 512,

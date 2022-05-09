@@ -1,5 +1,5 @@
 import {InferenceSession, Tensor} from "onnxruntime-web";
-import {NeuralNetworkType} from "../components/MainApp";
+import {NnTypeEnum} from "../models/nn-type.enum";
 
 /**
  * Crate and run neural network session with wasm in browser
@@ -7,7 +7,7 @@ import {NeuralNetworkType} from "../components/MainApp";
  * @param data - image data for segmentation as tensor
  * @param nnType - type representation of neural network
  */
-export const createAndRunSession = async (data: Tensor, nnType: NeuralNetworkType): Promise<Tensor> => {
+export const createAndRunSession = async (data: Tensor, nnType: NnTypeEnum): Promise<Tensor> => {
     // import the neural network model
     const session = await InferenceSession
         .create(getNNModelPath(nnType),
@@ -37,16 +37,15 @@ const runSession = async (session: InferenceSession, data: Tensor): Promise<Tens
  * Get the right Neural network model for app
  * @param nnType - type representation of neural network
  */
-const getNNModelPath = (nnType: NeuralNetworkType): string => {
+const getNNModelPath = (nnType: NnTypeEnum): string => {
     switch (nnType) {
-        case NeuralNetworkType.TUMOR:
+        case NnTypeEnum.TUMOR:
             return './_next/static/chunks/pages/brain_tumor_model.onnx';
-        case NeuralNetworkType.EYE:
+        case NnTypeEnum.EYE:
             return './_next/static/chunks/pages/brain_eyes_model.onnx';
-        case NeuralNetworkType.BRAINSTEM:
+        case NnTypeEnum.BRAINSTEM:
             return './_next/static/chunks/pages/brain_brainstem_model.onnx';
         default:
             return '';
     }
 }
-
