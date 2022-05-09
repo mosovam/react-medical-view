@@ -14,10 +14,8 @@ const View = ({imagesIds, pageType}: ViewProps) => {
     if (pageType === DiffButtonEnum.ABOUT) {
         // load dicom images from web if there is no image selected by user
         if (!imagesIds || imagesIds.length === 0) {
-            // imagesIds = dicomImagesFromWeb;
+            imagesIds = dicomImagesFromWeb;
         }
-
-        console.log('imagesIds', imagesIds);
 
         return (
             <CornerstoneViewport
