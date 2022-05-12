@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {cloneDeep} from 'lodash';
 import {initCornerstone} from "../cornerstone/basic-settings";
 import {getPredictions} from "../neural-network/predictions";
@@ -6,7 +6,7 @@ import {FilePrefixEnum} from "../models/file-prefix.enum";
 import {Tensor} from "onnxruntime-web";
 import CustomButton from "./CustomButton";
 import UploadFileButton from "./UploadFileButton";
-import {getImageAsJimp, loadActualShowedImage} from "../img-services/read-actual-image";
+import {loadActualShowedImage} from "../img-services/read-actual-image";
 import Jimp from "jimp";
 import {loadImageIntoCornerstone, loadNNImageIntoCornerstone} from "../img-services/img-cornerstone-loaders";
 import View from "./View";
@@ -15,7 +15,7 @@ import {NnTypeEnum} from "../models/nn-type.enum";
 import cornerstone from 'cornerstone-core';
 
 const MainApp = () => {
-    let loadImageAtStart = false;
+    let lastStructureMask = NnTypeEnum.TUMOR;
 
     // init cornerstone tools in app
     initCornerstone();
@@ -47,7 +47,7 @@ const MainApp = () => {
 
             // set images and automatically trigger the image change in cornerstone view component
             setActualImgId(imageIds[0]);
-            setImagesIds(imgIds => [...imgIds, ...imageIds]);
+            setImagesIds(imgIds => [...imageIds, ...imgIds]);
 
             console.log('File import COMPLETED!');
         }
@@ -70,7 +70,7 @@ const MainApp = () => {
      * @param imageId - image id with 'nnfile' prefix
      */
     const loadNNImage = (imageId: string): { promise: Promise<any> } => {
-        return loadNNImageIntoCornerstone(nnImages[imageId], imageId, cornerstone);
+        return loadNNImageIntoCornerstone(nnImages[imageId], imageId, cornerstone, imgFiles[actualImgId], lastStructureMask);
     }
 
     /**
@@ -113,7 +113,7 @@ const MainApp = () => {
         }));
 
         // set images and automatically trigger the image change in cornerstone view component
-        setImagesIds([...imagesIds, maskImageId]);
+        setImagesIds([maskImageId, ...imagesIds]);
     }
 
     /**
@@ -133,14 +133,17 @@ const MainApp = () => {
     }
 
     const getEyesMask = async () => {
+        lastStructureMask = NnTypeEnum.EYE;
         await getMask(NnTypeEnum.EYE);
     }
 
     const getBrainstemMask = async () => {
+        lastStructureMask = NnTypeEnum.BRAINSTEM;
         await getMask(NnTypeEnum.BRAINSTEM);
     }
 
     const getTumorMask = async () => {
+        lastStructureMask = NnTypeEnum.TUMOR;
         await getMask(NnTypeEnum.TUMOR);
     }
 

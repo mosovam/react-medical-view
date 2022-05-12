@@ -1,5 +1,8 @@
 import {tensorToImageData} from "./tensor-loader";
 import {Tensor} from "onnxruntime-web";
+import {loadActualShowedImage} from "./read-actual-image";
+import Jimp from "jimp";
+import {NnTypeEnum} from "../models/nn-type.enum";
 
 /**
  * SOURCES
@@ -59,15 +62,19 @@ export const loadImageIntoCornerstone = (image: File, imageId: string, cornersto
  * @param imageId - image id with 'nnfile' prefix
  * @param cornerstone - cornerstone class
  */
-export const loadNNImageIntoCornerstone = (image: Tensor, imageId: string, cornerstone): { promise: Promise<any> } => {
+export const loadNNImageIntoCornerstone = (image: Tensor, imageId: string, cornerstone, actualImageFile, structureType: NnTypeEnum): { promise: Promise<any> } => {
     const promise = new Promise((resolve, reject) => {
 
-        // convert vector returned by the neural network to image data
-        const img = tensorToImageData(image);
-        // convert buffer to image that can be used in cornerstone view component
-        const imagePromise = arrayBufferToImage(img.data);
+        const actualImage = loadActualShowedImage(actualImageFile)
 
-        imagePromise.then((image) => {
+        actualImage.then((jipImg: Jimp) => {
+            // convert vector returned by the neural network to image data
+            const img = tensorToImageData(image, jipImg, structureType);
+            // convert buffer to image that can be used in cornerstone view component
+            const imagePromise = arrayBufferToImage(img.data);
+
+            return imagePromise
+        }).then((image) => {
             const imageObject = createImage(image, imageId, cornerstone);
             resolve(imageObject);
         }, reject).catch((e) => {
