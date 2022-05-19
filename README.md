@@ -1,7 +1,5 @@
 # React Medical View
 
-## Under development right now (4/2022)!
-
 App created with the [Next.js](https://nextjs.org/), [React](https://reactjs.org/), [ONNX](https://onnx.ai/) and the [Cornerstone](https://docs.cornerstonejs.org/) library.
 
 Practical part of my Bachelor thesis - Analysis of medical data using neural networks (OSU, Applied Informatics).
