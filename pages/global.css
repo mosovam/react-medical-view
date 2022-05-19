@@ -92,6 +92,15 @@ hr {
     line-height: 1.7em;
 }
 
+.importImg {
+    height: 90vh;
+    background: black;
+    color: white;
+    line-height: 3em;
+    text-align: center;
+    padding-top: 3em;
+}
+
 .mainView {
     flex-grow: 2;
     height: 96vh;

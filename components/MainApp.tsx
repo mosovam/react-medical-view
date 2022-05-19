@@ -24,7 +24,7 @@ const MainApp = () => {
     }
 
     // show About page or CornerstoneView component
-    const [diffButton, setDiffButton] = useState<string>(DiffButtonEnum.ABOUT);
+    const [diffButton, setDiffButton] = useState<string>(DiffButtonEnum.BACK);
     const changeButtonState = () => {
         const newDiff = diffButton === DiffButtonEnum.BACK ? DiffButtonEnum.ABOUT : DiffButtonEnum.BACK;
         setDiffButton(newDiff);
@@ -148,30 +148,8 @@ const MainApp = () => {
     }
 
     // register the images loaders to cornerstone
-    cornerstone.registerImageLoader(FilePrefixEnum.IMG, loadImportedImage)
-    cornerstone.registerImageLoader(FilePrefixEnum.NN, loadNNImage)
-
-/*    if (loadImageAtStart) {
-        loadImageAtStart = false;
-
-        getImageAsJimp('https://drive.google.com/uc?export=download&id=1y_bASrdwaxEdQpfhcGDU_3QbkriUeMpt', 512, 512)
-            .then((img: Jimp) => {
-                // set images and automatically trigger the image change in cornerstone view component
-                const imgFileId: string = `${FilePrefixEnum.IMG}:${(Math.round(Math.random() * 10000000))}`;
-                const arrayBufferView = new Uint8Array(img.bitmap.data);
-                const blob = new Blob([arrayBufferView]);
-                const file = new File([blob], "filename")
-
-                // store the file with imageId as object key
-                setImgFiles(images => ({
-                    ...images,
-                    [imgFileId]: file
-                }));
-
-                setActualImgId(imgFileId);
-                setImagesIds(imgIds => [...imgIds, imgFileId]);
-            })
-    }*/
+    cornerstone.registerImageLoader(FilePrefixEnum.IMG, loadImportedImage);
+    cornerstone.registerImageLoader(FilePrefixEnum.NN, loadNNImage);
 
     return (
         <div className={'container'}>

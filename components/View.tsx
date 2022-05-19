@@ -11,10 +11,15 @@ interface ViewProps {
 
 const View = ({imagesIds, pageType}: ViewProps) => {
 
-    if (pageType === DiffButtonEnum.ABOUT) {
+    if (pageType !== DiffButtonEnum.ABOUT) {
         // load dicom images from web if there is no image selected by user
+
         if (!imagesIds || imagesIds.length === 0) {
-            imagesIds = dicomImagesFromWeb;
+            return (
+                <div className={'importImg'}>
+                    Please import some image!
+                </div>
+            )
         }
 
         return (
