@@ -15,8 +15,6 @@ import {NnTypeEnum} from "../models/nn-type.enum";
 import cornerstone from 'cornerstone-core';
 
 const MainApp = () => {
-    let lastStructureMask = NnTypeEnum.TUMOR;
-
     // init cornerstone tools in app
     initCornerstone();
     const clearCornerstoneCache = (): void => {
@@ -35,6 +33,7 @@ const MainApp = () => {
     const [actualImgId, setActualImgId] = useState<string>();
     const [imgFiles, setImgFiles] = useState<{ [key: string]: File }>({});
     const [nnImages, setNnImages] = useState<{ [key: string]: any }>({});
+    const [lastStructureMask, setLastStructureMas] = useState<NnTypeEnum>(NnTypeEnum.TUMOR);
 
     /**
      * Import JPEG, JPG or PNG image selected by user and show it in cornerstone view component
@@ -133,17 +132,17 @@ const MainApp = () => {
     }
 
     const getEyesMask = async () => {
-        lastStructureMask = NnTypeEnum.EYE;
+        setLastStructureMas(NnTypeEnum.EYE);
         await getMask(NnTypeEnum.EYE);
     }
 
     const getBrainstemMask = async () => {
-        lastStructureMask = NnTypeEnum.BRAINSTEM;
+        setLastStructureMas(NnTypeEnum.BRAINSTEM);
         await getMask(NnTypeEnum.BRAINSTEM);
     }
 
     const getTumorMask = async () => {
-        lastStructureMask = NnTypeEnum.TUMOR;
+        setLastStructureMas(NnTypeEnum.TUMOR);
         await getMask(NnTypeEnum.TUMOR);
     }
 

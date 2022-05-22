@@ -1,4 +1,4 @@
-import {tensorToImageData} from "./tensor-loader";
+import {tensorToImageData} from "./tensor-to-img";
 import {Tensor} from "onnxruntime-web";
 import {loadActualShowedImage} from "./read-actual-image";
 import Jimp from "jimp";
@@ -61,6 +61,8 @@ export const loadImageIntoCornerstone = (image: File, imageId: string, cornersto
  * @param image - mask from neural network as Tensor
  * @param imageId - image id with 'nnfile' prefix
  * @param cornerstone - cornerstone class
+ * @param actualImageFile - last imported MRI image
+ * @param structureType - needed structure type
  */
 export const loadNNImageIntoCornerstone = (image: Tensor, imageId: string, cornerstone, actualImageFile, structureType: NnTypeEnum): { promise: Promise<any> } => {
     const promise = new Promise((resolve, reject) => {

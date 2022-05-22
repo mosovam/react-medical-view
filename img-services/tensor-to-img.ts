@@ -16,7 +16,7 @@ export const tensorToImageData = (tensor: Tensor, actualImage: Jimp, structureTy
      * dims: [1, 2, 512, 512]
      */
 
-    // 0, create 'fake' canvas element
+        // 0, create 'fake' canvas element
     const canvas = document.querySelector('canvas');
     const ctx = canvas.getContext("2d");
     const imgData = ctx.createImageData(tensor.dims[2], tensor.dims[3]);
@@ -40,13 +40,14 @@ export const tensorToImageData = (tensor: Tensor, actualImage: Jimp, structureTy
     let j = 0;
     let i = 0;
     const structureColor = getStructureColor(structureType);
+    const structureThreshold = getThresholdForStructure(structureType);
 
     // 2, go through all data and create R, G, B and alfa channels
     while (i < half) {
         const value = 255 - Math.round(tensorData[i] * 255);
 
         // add only segments to original image
-        if (value > 200) {
+        if (value > structureThreshold) {
             imgData.data[j] = structureColor.r;
             imgData.data[j + 1] = structureColor.g;
             imgData.data[j + 2] = structureColor.b;
@@ -75,7 +76,14 @@ const encodeTheBufferIntoImage = (arrayBuffer: ArrayBuffer): jpeg.BufferRet => {
     return jpeg.encode(rawImageData);
 }
 
-const getStructureColor = (structureType: NnTypeEnum): { r: number, g: number, b: number} => {
+/**
+ * Return specific structure color based on structure type
+ * - tumor = orange
+ * - eyes = purple
+ * - brainstem = blue
+ * @param structureType - actual needed structure type (tumor, eye, braisntem)
+ */
+const getStructureColor = (structureType: NnTypeEnum): { r: number, g: number, b: number } => {
     switch (structureType) {
         case NnTypeEnum.BRAINSTEM:
             return {
@@ -95,5 +103,14 @@ const getStructureColor = (structureType: NnTypeEnum): { r: number, g: number, b
                 g: 68,
                 b: 21
             };
+    }
+}
+
+const getThresholdForStructure = (structureType: NnTypeEnum): number => {
+    switch (structureType) {
+        case NnTypeEnum.TUMOR:
+            return 100;
+        default:
+            return 200;
     }
 }
